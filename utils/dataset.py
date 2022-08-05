@@ -9,7 +9,7 @@ import random
 
 
 class TransDataset(Dataset):
-    def __init__(self, filename, data_normalization=True, is_training=True, augmentation=True):
+    def __init__(self, filename, data_normalization=True, is_training=True, augmentation=False):
         super(TransDataset).__init__()
         self.is_training = is_training
         self.augmentation = augmentation
@@ -43,9 +43,14 @@ class TransDataset(Dataset):
     def __len__(self):
         return self.data_x.shape[0]
 
+    def normalization(self, x):
+        x = x.reshape((1,-1))
+        x = (x - np.min(x, axis=1, keepdims=True))/(np.max(x, axis=1, keepdims=True) - np.min(x, axis=1, keepdims=True) + 0.00000001)
+        return x
+    
     def transformation(self, x):
         if self.augmentation:
-            args = random.choice(['jitter', 'scaling', 'permutation', 'rotation', 'magnitude_warp', 'time_warp', 'window_slice', 'window_warp'])
+            args = random.choice(['jitter', 'scaling', 'permutation', 'rotation', 'magnitudewarp', 'timewarp', 'windowslice', 'windowwarp'])
         else:
             args = 'original'
             
@@ -67,18 +72,20 @@ class TransDataset(Dataset):
             x = aug.window_warp(x)
         else:
             pass;
+        x = self.normalization(x)
         return x
     
     def __getitem__(self, index):
-        x =  self.data_x[index]
+        x =  self.data_x[index].reshape((-1,1))
         y =  self.data_y[index]
 
         if self.is_training:
-            x1 = self.transformation(x).reshape((1,-1))
-            x2 = self.transformation(x).reshape((1,-1))
+            x1 = self.transformation(x)
+            x2 = self.transformation(x)
             return x1, x2, y
         else:
-            return x.reshape((1,-1)), y
+            x = self.normalization(x)
+            return x, y
 
 
 def test():

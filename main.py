@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 
 from models.SimCLR import SimCLR
 from models.linear_evaluation import LinearEvaResNet
-from train import trainSimCLR, trainLinearEvalution
+from train import trainSimCLR, trainLinearEvalution, trainSimCLR_
 from torchinfo import summary
 
 from utils.dataset import TransDataset
@@ -31,13 +31,22 @@ def create_dataloader(is_training=True):
 def create_model(pretrain, freeze_encoder=True):
     if pretrain:
         model = SimCLR(configs.viewmaker_configs, configs.encoder_configs)
+        # state_dict = torch.load(configs.save_model_path)
+        # model.load_state_dict(state_dict)
     else:
-        model = LinearEvaResNet(configs.num_classes, configs.encoder_configs)
+        model = LinearEvaResNet(configs.num_classes, configs.encoder_configs, viewmaker_config=configs.viewmaker_configs, use_viewer=True)
         state_dict = torch.load(configs.save_model_path)
         model_state = model.state_dict()
-        pretrained_dict = {k: v for k, v in state_dict.items() if k in model_state}
+        pretrained_dict = {k: v for k, v in state_dict.items() if k in model_state and "view" in k}
         model_state.update(pretrained_dict)
         model.load_state_dict(model_state)
+        
+        try:
+            for param in model.view.parameters():
+                    param.requires_grad = False
+        except:
+            pass
+        
         if freeze_encoder:
             for param in model.encoder.parameters():
                 param.requires_grad = False
@@ -45,9 +54,15 @@ def create_model(pretrain, freeze_encoder=True):
 
 def main():
     trainLoader, testLoader = create_dataloader(is_training=False)
-    model = create_model(pretrain=False).to(device)
-    # summary(model, ((256, 1, 3000), (256, 1, 3000)))
-    # trainSimCLR(model, trainLoader, testLoader, device)
+    # trainSet = TransDataset(configs.filepath_train, is_training=is_training)
+    # testSet = TransDataset(configs.filepath_test, is_training=True)
+    model = create_model(pretrain=False, freeze_encoder=False).to(device)
+    # model = nn.DataParallel(model)
+    # summary(model, ((256, 1, 6000), (256, 1, 6000)))s
+    # if configs.viewmaker_configs['use_viewmaker']:
+    #     trainSimCLR(model, trainLoader, testLoader, device)
+    # else:
+    #     trainSimCLR_(model, trainLoader, testLoader, device)
     trainLinearEvalution(model, trainLoader, testLoader, device)
     
     

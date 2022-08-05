@@ -10,7 +10,7 @@ from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, roc_auc_
 from scipy.special import softmax
 
 def trainSimCLR(model, trainloader, testloader, device):
-    optimizer_view = torch.optim.SGD(model.view.parameters(), lr=configs.LR, momentum=0.9)
+    optimizer_view = torch.optim.Adam(model.view.parameters(), lr=configs.LR)
     optimizer_encoder = torch.optim.Adam(model.encoder.parameters(), lr=configs.LR)
     
     contrastiveLoss = ContrastiveLoss(configs.batchsize).to(device)
@@ -22,8 +22,7 @@ def trainSimCLR(model, trainloader, testloader, device):
             x1, x2, label = batch
             x1_emb, x2_emb = model(x1.to(device, dtype=torch.float), 
                                    x2.to(device, dtype=torch.float))
-            # simclr_view = SimCLRObjective(x1_emb.squeeze(-1), x2_emb.squeeze(-1), t=0.07)
-            # simclr_encoder = SimCLRObjective(x1_emb.squeeze(-1), x2_emb.squeeze(-1), t=0.07)
+
             encoder_loss = contrastiveLoss(x1_emb, x2_emb)
             view_maker_loss = - encoder_loss.clone()
             
@@ -33,23 +32,53 @@ def trainSimCLR(model, trainloader, testloader, device):
             for param in model.encoder.parameters():
                 param.requires_grad = False
             view_maker_loss.backward(retain_graph=True)
+            epoch_loss_view += view_maker_loss.item() / len(trainloader)
             for param in model.encoder.parameters():
                 param.requires_grad = True
             
             for param in model.view.parameters():
                 param.requires_grad = False
             encoder_loss.backward()
+            epoch_loss_encoder += encoder_loss.item() / len(trainloader)
             for param in model.view.parameters():
                 param.requires_grad = True
             
             optimizer_view.step()
             optimizer_encoder.step()
             
-            epoch_loss_encoder += encoder_loss.item() / len(trainloader)
-            epoch_loss_view += view_maker_loss.item() / len(trainloader)
-            
         tb_writer.add_scalar('Loss/Encoder', epoch_loss_encoder, e)
         tb_writer.add_scalar('Loss/View', epoch_loss_view, e)
+        print('Training Epoch {} - Encoder Loss : {}, View Loss : {}'.format(e, 
+                                                                             epoch_loss_encoder, 
+                                                                             epoch_loss_view))
+        if e % 10 == 9:
+            save_path = configs.save_path + 'checkpoint_{}.pth'.format(e + 1)
+            # print(confusion_matrix(y_test, pred_y))
+            torch.save(model.state_dict(), save_path)
+            
+def trainSimCLR_(model, trainloader, testloader, device):
+    optimizer_encoder = torch.optim.Adam(model.encoder.parameters(), lr=configs.LR)
+    
+    contrastiveLoss = ContrastiveLoss(configs.batchsize).to(device)
+    tb_writer = SummaryWriter(log_dir = configs.save_path, comment='init_run')
+    for e in range(configs.epochs):
+        model.train()
+        epoch_loss_encoder, epoch_loss_view = 0, 0
+        for batch in tqdm(trainloader):
+            x1, x2, label = batch
+            x1_emb, x2_emb = model(x1.to(device, dtype=torch.float), 
+                                   x2.to(device, dtype=torch.float))
+
+            encoder_loss = contrastiveLoss(x1_emb, x2_emb)
+            
+            optimizer_encoder.zero_grad()
+            
+            encoder_loss.backward()
+            epoch_loss_encoder += encoder_loss.item() / len(trainloader)
+            
+            optimizer_encoder.step()
+            
+        tb_writer.add_scalar('Loss/Encoder', epoch_loss_encoder, e)
         print('Training Epoch {} - Encoder Loss : {}, View Loss : {}'.format(e, 
                                                                              epoch_loss_encoder, 
                                                                              epoch_loss_view))
