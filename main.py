@@ -53,17 +53,17 @@ def create_model(pretrain, freeze_encoder=True):
     return model
 
 def main():
-    trainLoader, testLoader = create_dataloader(is_training=False)
+    trainLoader, testLoader = create_dataloader(is_training=True)
     # trainSet = TransDataset(configs.filepath_train, is_training=is_training)
     # testSet = TransDataset(configs.filepath_test, is_training=True)
-    model = create_model(pretrain=False, freeze_encoder=False).to(device)
+    model = create_model(pretrain=True, freeze_encoder=False).to(device)
     # model = nn.DataParallel(model)
-    # summary(model, ((256, 1, 6000), (256, 1, 6000)))s
-    # if configs.viewmaker_configs['use_viewmaker']:
-    #     trainSimCLR(model, trainLoader, testLoader, device)
-    # else:
-    #     trainSimCLR_(model, trainLoader, testLoader, device)
-    trainLinearEvalution(model, trainLoader, testLoader, device)
+    summary(model, ((256, 1, 6000), (256, 1, 6000)))
+    if configs.viewmaker_configs['use_viewmaker']:
+        trainSimCLR(model, trainLoader, testLoader, device)
+    else:
+        trainSimCLR_(model, trainLoader, testLoader, device)
+    # trainLinearEvalution(model, trainLoader, testLoader, device)
     
     
     

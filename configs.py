@@ -24,7 +24,7 @@ encoder_configs = {
     'base_filters':32, # 64 for ResNet1D, 352 for ResNeXt1D
     'kernel_size':10, 
     'stride':2,
-    'n_block':16,
+    'n_block':18,
     'downsample_gap':2,
     'increasefilter_gap':4,
 }

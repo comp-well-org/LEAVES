@@ -3,7 +3,9 @@ import torch
 import torch.nn as nn
 from models.viewmaker import ViewMaker
 from models.resnet import ResNetEncoder
+from models.auto_aug import autoAUG
 import torch.nn.functional as F
+import configs
 
 def l2_normalize(x, dim=1):
     return x / torch.sqrt(torch.sum(x**2, dim=dim).unsqueeze(dim))
@@ -77,8 +79,10 @@ class SimCLR(nn.Module):
     def __init__(self, viewmaker_config, encoder_config):
         super().__init__()
         self.viewmaker_config = viewmaker_config
-        if self.viewmaker_config['use_viewmaker']:
-            self.view = self.create_viewmaker(viewmaker_config)
+        # if self.viewmaker_config['use_viewmaker']:
+        #     self.view = self.create_viewmaker(viewmaker_config)
+        print(configs.in_channel)
+        self.view = autoAUG(num_channel = configs.in_channel)
         self.encoder = self.create_encoder(encoder_config)
         
     def create_viewmaker(self, viewmaker_config):
