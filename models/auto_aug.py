@@ -1,5 +1,7 @@
+from re import X
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from utils.differentiable_augs import jitter, scaling, rotation, time_distortion, permutation, magnitude_warp
 import configs
 
@@ -30,13 +32,19 @@ class autoAUG(nn.Module):
         self.params = [self.jitter_sigma, self.scaling_sigma, self.rotation_prob, self.mixture_weights,
                        self.nromal_mean, self.nromal_sigma, self.permuation_seg, self.magW_sigma]
 
+        self.e = 1e-5
 
+    def normalization(self, x):
+        x -= x.min(2, keepdim=True)[0]
+        x /= (x.max(2, keepdim=True)[0] + 0.00000001)
+        return x
+    
     def forward(self, x):
-        x = self.jitter(x, self.jitter_sigma)
-        x = self.scaling(x, self.scaling_sigma)
-        x = self.rotation(x, self.rotation_prob.repeat(x.size(0), 1))
-        x = self.timeDis(x, self.mixture_weights, self.nromal_mean, self.nromal_sigma)
+        x = self.jitter(x, 0.1 * torch.sigmoid(self.jitter_sigma) + self.e)
+        x = self.scaling(x, 0.1 * torch.sigmoid(self.scaling_sigma) + self.e)
+        x = self.rotation(x, torch.sigmoid(self.rotation_prob).repeat(x.size(0), 1))
+        x = self.timeDis(x, self.mixture_weights, self.nromal_mean, 0.1 * torch.sigmoid(self.nromal_sigma) + self.e)
         x = self.permutation(x, self.permuation_seg)
-        x = self.magW(x, self.magW_sigma)
-
+        x = self.magW(x, 0.1 * torch.sigmoid(self.magW_sigma) + self.e)
+        x = self.normalization(x)
         return x

@@ -56,7 +56,7 @@ def rotation(x, probs, temperature=0.01):
 
 ## Time distortion
 def time_distortion(x, mixture_weights, nromal_mean, nromal_sigma):
-    mixture_cate = torch.distributions.Categorical(probs=mixture_weights)
+    mixture_cate = torch.distributions.Categorical(probs=F.softmax(mixture_weights))
     normal_dists = StableNormal(loc=nromal_mean, scale=nromal_sigma)
     mixture_normal = ReparametrizedMixtureSameFamily(mixture_distribution=mixture_cate,
                                                      component_distribution=normal_dists)

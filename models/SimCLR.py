@@ -81,7 +81,6 @@ class SimCLR(nn.Module):
         self.viewmaker_config = viewmaker_config
         # if self.viewmaker_config['use_viewmaker']:
         #     self.view = self.create_viewmaker(viewmaker_config)
-        print(configs.in_channel)
         self.view = autoAUG(num_channel = configs.in_channel)
         self.encoder = self.create_encoder(encoder_config)
         
@@ -107,7 +106,7 @@ class SimCLR(nn.Module):
     def forward(self, x1, x2):
         if self.viewmaker_config['use_viewmaker']:
             x1 = self.view(x1)
-            x2 = self.view(x2)
+            # x2 = self.view(x2)
         
         view1_emb = self.encoder(x1)
         view2_emb = self.encoder(x2)

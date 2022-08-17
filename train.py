@@ -10,12 +10,17 @@ from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, roc_auc_
 from scipy.special import softmax
 
 def trainSimCLR(model, trainloader, testloader, device):
-    optimizer_view = torch.optim.Adam(model.view.parameters(), lr=configs.LR)
+    
+    view_parameters = list(model.view.parameters()) + model.view.params
+    optimizer_view = torch.optim.Adam(view_parameters, lr=configs.LR)
     optimizer_encoder = torch.optim.Adam(model.encoder.parameters(), lr=configs.LR)
     
     contrastiveLoss = ContrastiveLoss(configs.batchsize).to(device)
     tb_writer = SummaryWriter(log_dir = configs.save_path, comment='init_run')
+    
+    params_dict = {}
     for e in range(configs.epochs):
+        params_dict[e] = [x.detach().cpu().numpy() for x in model.view.params]
         model.train()
         epoch_loss_encoder, epoch_loss_view = 0, 0
         for batch in tqdm(trainloader):
@@ -24,7 +29,7 @@ def trainSimCLR(model, trainloader, testloader, device):
                                    x2.to(device, dtype=torch.float))
 
             encoder_loss = contrastiveLoss(x1_emb, x2_emb)
-            view_maker_loss = - encoder_loss.clone()
+            view_maker_loss = - 0.01 * encoder_loss.clone()
             
             optimizer_encoder.zero_grad()
             optimizer_view.zero_grad()
@@ -55,7 +60,8 @@ def trainSimCLR(model, trainloader, testloader, device):
             save_path = configs.save_path + 'checkpoint_{}.pth'.format(e + 1)
             # print(confusion_matrix(y_test, pred_y))
             torch.save(model.state_dict(), save_path)
-            
+        np.save(configs.save_path + 'params_dict.npy', params_dict, allow_pickle=True)
+        
 def trainSimCLR_(model, trainloader, testloader, device):
     optimizer_encoder = torch.optim.Adam(model.encoder.parameters(), lr=configs.LR)
     

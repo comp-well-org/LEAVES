@@ -5,9 +5,9 @@ filepath_test = '/rdf/data/physionet.org/processed_DA/sleep_apnea/sleep_apnea_te
 num_classes = 2
 
 batchsize = 128
-LR = 5e-3
-epochs = 500
-save_path = './experiments/sleep_apnea/normalization/'
+LR = 1e-3
+epochs = 100
+save_path = './experiments/sleep_apnea/autoAUG/'
 save_model_path = save_path + 'checkpoint_120.pth'
 ################################ Model Configs ################################
 in_channel = 1

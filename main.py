@@ -58,7 +58,7 @@ def main():
     # testSet = TransDataset(configs.filepath_test, is_training=True)
     model = create_model(pretrain=True, freeze_encoder=False).to(device)
     # model = nn.DataParallel(model)
-    summary(model, ((256, 1, 6000), (256, 1, 6000)))
+    # summary(model, ((256, 1, 6000), (256, 1, 6000)))
     if configs.viewmaker_configs['use_viewmaker']:
         trainSimCLR(model, trainLoader, testLoader, device)
     else:
