@@ -1,7 +1,7 @@
 import math
 import torch
 import torch.nn as nn
-from models.viewmaker import ViewMaker
+# from models.viewmaker import ViewMaker
 from models.resnet import ResNetEncoder
 from models.auto_aug import autoAUG
 import torch.nn.functional as F
@@ -84,11 +84,11 @@ class SimCLR(nn.Module):
         self.view = autoAUG(num_channel = configs.in_channel)
         self.encoder = self.create_encoder(encoder_config)
         
-    def create_viewmaker(self, viewmaker_config):
-        view_model = ViewMaker(num_channels = viewmaker_config['num_channels'],
-                               distortion_budget = viewmaker_config['view_bound_magnitude'],
-                               clamp = viewmaker_config['clamp'])
-        return view_model
+    # def create_viewmaker(self, viewmaker_config):
+    #     view_model = ViewMaker(num_channels = viewmaker_config['num_channels'],
+    #                            distortion_budget = viewmaker_config['view_bound_magnitude'],
+    #                            clamp = viewmaker_config['clamp'])
+    #     return view_model
     
     def create_encoder(self, encoder_config):
         encoder = ResNetEncoder(

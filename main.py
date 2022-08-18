@@ -53,11 +53,11 @@ def create_model(pretrain, freeze_encoder=True):
     return model
 
 def main():
-    trainLoader, testLoader = create_dataloader(is_training=True)
+    trainLoader, testLoader = create_dataloader(is_training=configs.pretrain)
     # trainSet = TransDataset(configs.filepath_train, is_training=is_training)
     # testSet = TransDataset(configs.filepath_test, is_training=True)
-    model = create_model(pretrain=True, freeze_encoder=False).to(device)
-    # model = nn.DataParallel(model)
+    model = create_model(pretrain=configs.pretrain, freeze_encoder=False).to(device)
+    model = nn.DataParallel(model)
     # summary(model, ((256, 1, 6000), (256, 1, 6000)))
     if configs.viewmaker_configs['use_viewmaker']:
         trainSimCLR(model, trainLoader, testLoader, device)
@@ -69,4 +69,3 @@ def main():
     
 if __name__ == '__main__':
     main()
-    print(1)

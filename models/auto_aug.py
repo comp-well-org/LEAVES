@@ -18,9 +18,9 @@ class autoAUG(nn.Module):
         # self.rotation_prob = self.rotation_prob.repeat(configs.batchsize, 1)
         self.rotation = rotation
 
-        self.mixture_weights = nn.Parameter(torch.ones(3), requires_grad=True)
-        self.nromal_mean = nn.Parameter(torch.Tensor([-0.5, 0.0, 0.5]), requires_grad=True)
-        self.nromal_sigma = nn.Parameter(torch.Tensor([0.7, 0.7, 0.7]), requires_grad=True)
+        self.mixture_weights = nn.Parameter(torch.ones(5), requires_grad=True)
+        self.nromal_mean = nn.Parameter(torch.Tensor([-0.25, -0.5, 0.0, 0.25, 0.5]), requires_grad=True)
+        self.nromal_sigma = nn.Parameter(torch.Tensor([0.7, 0.7, 0.7, 0.7, 0.7]), requires_grad=True)
         self.timeDis = time_distortion
 
         self.permuation_seg = nn.Parameter(5 * torch.ones(1), requires_grad=True)
@@ -40,11 +40,11 @@ class autoAUG(nn.Module):
         return x
     
     def forward(self, x):
-        x = self.jitter(x, 0.1 * torch.sigmoid(self.jitter_sigma) + self.e)
-        x = self.scaling(x, 0.1 * torch.sigmoid(self.scaling_sigma) + self.e)
+        x = self.jitter(x, 0.05 * torch.sigmoid(self.jitter_sigma) + self.e)
+        x = self.scaling(x, 0.05 * torch.sigmoid(self.scaling_sigma) + self.e)
         x = self.rotation(x, torch.sigmoid(self.rotation_prob).repeat(x.size(0), 1))
-        x = self.timeDis(x, self.mixture_weights, self.nromal_mean, 0.1 * torch.sigmoid(self.nromal_sigma) + self.e)
+        x = self.timeDis(x, self.mixture_weights, self.nromal_mean, F.relu(self.nromal_sigma) + self.e)
         x = self.permutation(x, self.permuation_seg)
-        x = self.magW(x, 0.1 * torch.sigmoid(self.magW_sigma) + self.e)
+        x = self.magW(x, 0.05 * torch.sigmoid(self.magW_sigma) + self.e)
         x = self.normalization(x)
         return x
