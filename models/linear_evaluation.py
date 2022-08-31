@@ -16,7 +16,7 @@ class LinearEvaResNet(nn.Module):
             self.view = self.create_viewmaker(viewmaker_config)
         
         self.encoder = self.create_encoder(encoder_config)
-        self.fc = nn.Linear(256, 1024)
+        self.fc = nn.Linear(512, 1024)
         self.dense1 = nn.Linear(1024, 512)
         self.dense2 = nn.Linear(512, self.num_classes)
         self.dropout = nn.Dropout(0.5)
