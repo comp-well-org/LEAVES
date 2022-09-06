@@ -3,17 +3,17 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 from models.resnet import ResNetEncoder
-from models.viewmaker import ViewMaker
+# from models.viewmaker import ViewMaker
 
 class LinearEvaResNet(nn.Module):
     def __init__(self, num_classes, encoder_config, viewmaker_config=None, use_viewer=False):
         super().__init__()
         self.num_classes = num_classes
-        self.use_viewer = use_viewer
-        if use_viewer:
-            if viewmaker_config==None:
-                raise Exception("Please specify viewmaker configuration if you want to use view maker!")
-            self.view = self.create_viewmaker(viewmaker_config)
+        # self.use_viewer = use_viewer
+        # if use_viewer:
+        #     if viewmaker_config==None:
+        #         raise Exception("Please specify viewmaker configuration if you want to use view maker!")
+        #     self.view = self.create_viewmaker(viewmaker_config)
         
         self.encoder = self.create_encoder(encoder_config)
         self.fc = nn.Linear(512, 1024)
@@ -21,11 +21,11 @@ class LinearEvaResNet(nn.Module):
         self.dense2 = nn.Linear(512, self.num_classes)
         self.dropout = nn.Dropout(0.5)
     
-    def create_viewmaker(self, viewmaker_config):
-        view_model = ViewMaker(num_channels = viewmaker_config['num_channels'],
-                               distortion_budget = viewmaker_config['view_bound_magnitude'],
-                               clamp = viewmaker_config['clamp'])
-        return view_model 
+    # def create_viewmaker(self, viewmaker_config):
+    #     view_model = ViewMaker(num_channels = viewmaker_config['num_channels'],
+    #                            distortion_budget = viewmaker_config['view_bound_magnitude'],
+    #                            clamp = viewmaker_config['clamp'])
+    #     return view_model
         
     def create_encoder(self, encoder_config):
         encoder = ResNetEncoder(

@@ -1,4 +1,10 @@
-from re import I
+import subprocess
+import sys
+def install(package):
+    subprocess.check_call([sys.executable, "-q", "-m", "pip", "install", package])
+
+install('tensorboard')
+
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
@@ -6,7 +12,7 @@ from torch.utils.data import DataLoader
 from models.SimCLR import SimCLR
 from models.linear_evaluation import LinearEvaResNet
 from train import trainSimCLR, trainLinearEvalution, trainSimCLR_
-from torchinfo import summary
+# from torchinfo import summary
 
 from utils.dataset import TransDataset
 import configs
@@ -58,13 +64,13 @@ def main():
     # trainSet = TransDataset(configs.filepath_train, is_training=is_training)
     # testSet = TransDataset(configs.filepath_test, is_training=True)
     model = create_model(pretrain=configs.pretrain, freeze_encoder=False).to(device)
-    # model = nn.DataParallel(model)
+    model = nn.DataParallel(model)
     # summary(model, ((256, 1, 6000), (256, 1, 6000)))
-    # if configs.viewmaker_configs['use_viewmaker']:
-    #     trainSimCLR(model, trainLoader, testLoader, device)
-    # else:
-    #     trainSimCLR_(model, trainLoader, testLoader, device)
-    trainLinearEvalution(model, trainLoader, testLoader, device)
+    if configs.viewmaker_configs['use_viewmaker']:
+        trainSimCLR(model, trainLoader, testLoader, device)
+    else:
+        trainSimCLR_(model, trainLoader, testLoader, device)
+    # trainLinearEvalution(model, trainLoader, testLoader, device)
     
 if __name__ == '__main__':
     main()

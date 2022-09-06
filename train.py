@@ -11,16 +11,16 @@ from scipy.special import softmax
 
 def trainSimCLR(model, trainloader, testloader, device):
     
-    view_parameters = list(model.view.parameters()) + model.view.params
+    view_parameters = list(model.module.view.parameters()) + model.module.view.params
     optimizer_view = torch.optim.Adam(view_parameters, lr=configs.LR)
-    optimizer_encoder = torch.optim.Adam(model.encoder.parameters(), lr=configs.LR)
+    optimizer_encoder = torch.optim.Adam(model.module.encoder.parameters(), lr=configs.LR)
     
     contrastiveLoss = ContrastiveLoss(configs.batchsize).to(device)
     tb_writer = SummaryWriter(log_dir = configs.save_path, comment='init_run')
     
     params_dict = {}
     for e in range(configs.epochs):
-        params_dict[e] = [x.detach().cpu().numpy() for x in model.view.params]
+        params_dict[e] = [x.detach().cpu().numpy() for x in model.module.view.params]
         model.train()
         epoch_loss_encoder, epoch_loss_view = 0, 0
         for batch in tqdm(trainloader):
@@ -29,23 +29,23 @@ def trainSimCLR(model, trainloader, testloader, device):
                                    x2.to(device, dtype=torch.float))
 
             encoder_loss = contrastiveLoss(x1_emb, x2_emb)
-            view_maker_loss = - 0.01 * encoder_loss.clone()
+            view_maker_loss = - encoder_loss.clone()
             
             optimizer_encoder.zero_grad()
             optimizer_view.zero_grad()
             
-            for param in model.encoder.parameters():
+            for param in model.module.encoder.parameters():
                 param.requires_grad = False
             view_maker_loss.backward(retain_graph=True)
             epoch_loss_view += view_maker_loss.item() / len(trainloader)
-            for param in model.encoder.parameters():
+            for param in model.module.encoder.parameters():
                 param.requires_grad = True
             
-            for param in model.view.parameters():
+            for param in model.module.view.parameters():
                 param.requires_grad = False
             encoder_loss.backward()
             epoch_loss_encoder += encoder_loss.item() / len(trainloader)
-            for param in model.view.parameters():
+            for param in model.module.view.parameters():
                 param.requires_grad = True
             
             optimizer_view.step()
@@ -53,7 +53,7 @@ def trainSimCLR(model, trainloader, testloader, device):
             
         tb_writer.add_scalar('Loss/Encoder', epoch_loss_encoder, e)
         tb_writer.add_scalar('Loss/View', epoch_loss_view, e)
-        print('Training Epoch {} - Encoder Loss : {}, View Loss : {}'.format(e, 
+        print('Training Epoch {} - EncoderLoss: {}, ViewLoss: {}'.format(e,
                                                                              epoch_loss_encoder, 
                                                                              epoch_loss_view))
         if e % 10 == 9:
