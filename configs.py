@@ -1,16 +1,16 @@
-pretrain = False
+pretrain = True
 
 
 ################################ Data Configs ###############################
 import os
-data_dir_aws = "/rdf/data/physionet.org/processed_DA/sleep_apnea"
+data_dir_aws = os.environ["SM_CHANNEL_TRAINING"]
 
-filepath_train = os.path.join(data_dir_aws, "sleep_apnea_train.csv")
-filepath_test = os.path.join(data_dir_aws, "sleep_apnea_test.csv")
+filepath_train = os.path.join(data_dir_aws, "train_EEG.csv")
+filepath_test = os.path.join(data_dir_aws, "test_EEG.csv")
 
 num_classes = 2
 
-batchsize = 128
+batchsize = 192
 LR = 1e-3
 epochs = 150
 save_path = '.experiments/sleep_apnea/init_run'

@@ -77,7 +77,7 @@ class permuteView(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x, num_seg):
         splits = torch.split(x, torch.div(x.size(-1), int(num_seg), rounding_mode='trunc'), dim=-1)
-        if x.size(-1) % num_seg == 0:
+        if x.size(-1) % int(num_seg) == 0:
             permuted_order = torch.randperm(int(num_seg))
         else:
             permuted_order = torch.randperm(int(num_seg) + 1)
