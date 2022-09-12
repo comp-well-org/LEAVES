@@ -13,8 +13,8 @@ num_classes = 2
 batchsize = 128
 LR = 1e-3
 epochs = 150
-save_path = '.experiments/sleep_apnea/auto_aug_hyper_modified'
-save_model_path = save_path + 'checkpoint_150.pth'
+save_path = '.experiments/sleep_apnea/init_run'
+save_model_path = save_path + 'checkpoint_90.pth'
 ################################ Model Configs ################################
 in_channel = 1
 
