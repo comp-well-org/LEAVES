@@ -9,7 +9,7 @@ class LinearEvaResNet(nn.Module):
     def __init__(self, num_classes, encoder_config, viewmaker_config=None, use_viewer=False):
         super().__init__()
         self.num_classes = num_classes
-        # self.use_viewer = use_viewer
+        self.use_viewer = use_viewer
         # if use_viewer:
         #     if viewmaker_config==None:
         #         raise Exception("Please specify viewmaker configuration if you want to use view maker!")
@@ -42,8 +42,8 @@ class LinearEvaResNet(nn.Module):
     
     def forward(self, x):
         batch_size = x.size(0)
-        if self.use_viewer:
-            output = self.view(x)
+        # if self.use_viewer:
+        #     output = self.view(x)
         output = self.encoder(x)
         output = output.view(batch_size, -1)
         output = self.dropout(output)

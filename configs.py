@@ -3,20 +3,23 @@ pretrain = True
 
 ################################ Data Configs ###############################
 import os
-data_dir_aws = os.environ["SM_CHANNEL_TRAINING"]
+# data_dir_aws = os.environ["SM_CHANNEL_TRAINING"]
+data_dir_aws = "/rdf/data/PTB-XL/"
 
-filepath_train = os.path.join(data_dir_aws, "train_EEG.csv")
-filepath_test = os.path.join(data_dir_aws, "test_EEG.csv")
+filepath_train = os.path.join(data_dir_aws, "train_dict_12lead.npy")
+filepath_test = os.path.join(data_dir_aws, "test_dict_12lead.npy")
 
-num_classes = 2
+num_classes = 5
 
-batchsize = 192
+batchsize = 128
 LR = 1e-3
-epochs = 150
-save_path = '.experiments/sleep_apnea/init_run'
-save_model_path = save_path + 'checkpoint_90.pth'
+epochs = 200
+# save_path = '/opt/ml/model/'
+
+save_path = '/home/hy29/rdf/viewmaker_physiological/experiments/ptbxl/init_run/'
+save_model_path = save_path + 'checkpoint_70.pth'
 ################################ Model Configs ################################
-in_channel = 1
+in_channel = 12
 
 viewmaker_configs = {
     'use_viewmaker' : True,

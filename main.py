@@ -3,7 +3,7 @@ import sys
 def install(package):
     subprocess.check_call([sys.executable, "-q", "-m", "pip", "install", package])
 
-install('tensorboard')
+# install('tensorboard')
 
 import torch
 import torch.nn as nn
@@ -34,17 +34,23 @@ def create_dataloader(is_training=True):
         drop_last=True)
     return trainLoader, testLoader
 
-def create_model(pretrain, load_pretrained = False, freeze_encoder=True):
+def create_model(pretrain, load_pretrained = True, freeze_encoder=True):
     if pretrain:
         model = SimCLR(configs.viewmaker_configs, configs.encoder_configs)
         # state_dict = torch.load(configs.save_model_path)
         # model.load_state_dict(state_dict)
     else:
         model = LinearEvaResNet(configs.num_classes, configs.encoder_configs, viewmaker_config=configs.viewmaker_configs, use_viewer=True)
+        # model = nn.DataParallel(model)
         if load_pretrained:
             state_dict = torch.load(configs.save_model_path)
+            new_state_dict = {}
+            for k, v in state_dict.items():
+                name = k[7:] # remove `module.`
+                new_state_dict[name] = v
             model_state = model.state_dict()
-            pretrained_dict = {k: v for k, v in state_dict.items() if k in model_state and "view" in k}
+            pretrained_dict = {k: v for k, v in new_state_dict.items() if k in model_state and "encoder" in k}
+            print(pretrained_dict.keys())
             model_state.update(pretrained_dict)
             model.load_state_dict(model_state)
             
@@ -66,11 +72,13 @@ def main():
     model = create_model(pretrain=configs.pretrain, freeze_encoder=False).to(device)
     model = nn.DataParallel(model)
     # summary(model, ((256, 1, 6000), (256, 1, 6000)))
-    if configs.viewmaker_configs['use_viewmaker']:
-        trainSimCLR(model, trainLoader, testLoader, device)
+    if configs.pretrain:
+        if configs.viewmaker_configs['use_viewmaker']:
+            trainSimCLR(model, trainLoader, testLoader, device)
+        else:
+            trainSimCLR_(model, trainLoader, testLoader, device)
     else:
-        trainSimCLR_(model, trainLoader, testLoader, device)
-    # trainLinearEvalution(model, trainLoader, testLoader, device)
+        trainLinearEvalution(model, trainLoader, testLoader, device)
     
 if __name__ == '__main__':
     main()

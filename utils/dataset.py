@@ -25,26 +25,25 @@ class TransDataset(Dataset):
             self.data_y = data[:, 0]
             self.data_x = data[:, 1:]
             self.data_y = Catergorical2OneHotCoding(self.data_y.astype(np.int8))
-        else:   
-            data = np.load(filename)
-            # obtain the labels and convert it to one hot coding.
-            self.data_y = data[:, 0]
-            # self.data_y = self.data_y - 1;  # covert the label from 1:K to 0:K-1
-            self.data_y = Catergorical2OneHotCoding(self.data_y.astype(np.int8))
-            self.data_x = data[:, 1:]
-            # self.data_x.columns = range(self.data_x.shape[1])
-            # self.data_x = self.data_x.values
+        else:
+            data_dict = np.load(filename, allow_pickle=True).item();
+            self.data_x = data_dict['ECG_signal']
+            self.data_x = np.transpose(self.data_x, (0,2,1))
+            self.data_y = data_dict['label']
+            self.data_y = Catergorical2OneHotCoding(self.data_y.astype(np.int8).reshape(-1,))
+
         if data_normalization:
             std_ = self.data_x.std(axis=1, keepdims=True)
             std_[std_ == 0] = 1.0
             self.data_x = (self.data_x - self.data_x.mean(axis=1, keepdims=True)) / std_
-        self.data_x = np.expand_dims(self.data_x, axis=-1)
+        if len(self.data_x) == 1:
+            self.data_x = np.expand_dims(self.data_x, axis=-1)
 
     def __len__(self):
         return self.data_x.shape[0]
 
     def normalization(self, x):
-        x = x.reshape((1,-1))
+        # x = x.reshape((1,-1))
         x = (x - np.min(x, axis=1, keepdims=True))/(np.max(x, axis=1, keepdims=True) - np.min(x, axis=1, keepdims=True) + 0.00000001)
         return x
     
@@ -76,9 +75,9 @@ class TransDataset(Dataset):
         return x
     
     def __getitem__(self, index):
-        x =  self.data_x[index].reshape((-1,1))
+        x =  self.data_x[index]
         y =  self.data_y[index]
-
+        self.is_training = False
         if self.is_training:
             x1 = self.transformation(x)
             x2 = self.transformation(x)
@@ -86,6 +85,7 @@ class TransDataset(Dataset):
         else:
             x = self.normalization(x)
             return x, y
+            # return x, x.copy(), y
 
 
 def test():

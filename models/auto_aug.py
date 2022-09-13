@@ -42,7 +42,7 @@ class autoAUG(nn.Module):
     def forward(self, x):
         x = self.jitter(x, 0.05 * torch.sigmoid(self.jitter_sigma) + self.e)
         x = self.scaling(x, 0.05 * torch.sigmoid(self.scaling_sigma) + self.e)
-        x = self.rotation(x, torch.sigmoid(self.rotation_prob).repeat(x.size(0), 1))
+        # x = self.rotation(x, torch.sigmoid(self.rotation_prob).repeat(x.size(0), 1))
         x = self.timeDis(x, self.mixture_weights, self.nromal_mean, F.relu(self.nromal_sigma) + self.e)
         x = self.permutation(x, self.permuation_seg)
         x = self.magW(x, 0.05 * torch.sigmoid(self.magW_sigma) + self.e)

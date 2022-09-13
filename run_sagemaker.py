@@ -15,8 +15,9 @@ metric_definitions = [
 ]
 
 estimator = PyTorch(entry_point='main.py',
-                    source_dir= r'C://Users/hello/Projects/viewmaker_physiological',
-                    base_job_name = 'ViewMaker-sleep-edfe',
+                    # source_dir= r'C://Users/hello/Projects/viewmaker_physiological',
+                    source_dir= '/home/hy29/rdf/viewmaker_physiological',
+                    base_job_name = 'ViewMaker-ptbxl',
                     role=role,
                     py_version='py3',
                     framework_version='1.8.0',
