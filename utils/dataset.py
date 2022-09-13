@@ -84,8 +84,8 @@ class TransDataset(Dataset):
             return x1, x2, y
         else:
             x = self.normalization(x)
-            return x, y
-            # return x, x.copy(), y
+            # return x, y
+            return x, x.copy(), y
 
 
 def test():
