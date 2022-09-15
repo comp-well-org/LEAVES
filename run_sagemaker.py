@@ -17,7 +17,7 @@ metric_definitions = [
 estimator = PyTorch(entry_point='main.py',
                     # source_dir= r'C://Users/hello/Projects/viewmaker_physiological',
                     source_dir= '/home/hy29/rdf/viewmaker_physiological',
-                    base_job_name = 'ViewMaker-ptbxl',
+                    base_job_name = 'ViewMaker-PAMAP2',
                     role=role,
                     py_version='py3',
                     framework_version='1.8.0',
@@ -26,4 +26,4 @@ estimator = PyTorch(entry_point='main.py',
                     metric_definitions=metric_definitions
                     )
 
-estimator.fit({'training': 's3://compwell-databucket/processed_DA/ptbxl/100hz/'})
+estimator.fit({'training': 's3://compwell-databucket/processed_DA/PAMAP2/'})

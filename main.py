@@ -1,5 +1,8 @@
 import subprocess
 import sys
+
+from models.resnet_1d import model_ResNet
+
 def install(package):
     subprocess.check_call([sys.executable, "-q", "-m", "pip", "install", package])
 
@@ -26,12 +29,14 @@ def create_dataloader(is_training=True):
         trainSet,
         batch_size=configs.batchsize,
         shuffle=True,
-        drop_last=True)
+        drop_last=True, 
+        num_workers=8)
     testLoader = DataLoader(
         testSet,
         batch_size=configs.batchsize,
         shuffle=True,
-        drop_last=True)
+        drop_last=True,
+        num_workers=8)
     return trainLoader, testLoader
 
 def create_model(pretrain, load_pretrained = True, freeze_encoder=True):
@@ -69,7 +74,12 @@ def main():
     trainLoader, testLoader = create_dataloader(is_training=configs.pretrain)
     # trainSet = TransDataset(configs.filepath_train, is_training=is_training)
     # testSet = TransDataset(configs.filepath_test, is_training=True)
-    model = create_model(pretrain=configs.pretrain, freeze_encoder=False).to(device)
+    # model = model_ResNet([2,2,2,2], 
+    #                      inchannel=configs.in_channel, 
+    #                      num_classes=configs.num_classes).to(device)
+    model = create_model(pretrain=configs.pretrain, 
+                         load_pretrained=True, 
+                         freeze_encoder=False).to(device)
     model = nn.DataParallel(model)
     # summary(model, ((256, 1, 6000), (256, 1, 6000)))
     if configs.pretrain:

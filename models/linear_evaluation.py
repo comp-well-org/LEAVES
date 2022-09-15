@@ -3,6 +3,8 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 from models.resnet import ResNetEncoder
+from models.resnet_1d import model_ResNet
+import configs
 # from models.viewmaker import ViewMaker
 
 class LinearEvaResNet(nn.Module):
@@ -28,16 +30,20 @@ class LinearEvaResNet(nn.Module):
     #     return view_model
         
     def create_encoder(self, encoder_config):
-        encoder = ResNetEncoder(
-                        in_channels=encoder_config['in_channels'], 
-                        base_filters=encoder_config['base_filters'],
-                        kernel_size=encoder_config['kernel_size'], 
-                        stride=encoder_config['stride'], 
-                        groups=1, 
-                        n_block=encoder_config['n_block'], 
-                        downsample_gap=encoder_config['downsample_gap'], 
-                        increasefilter_gap=encoder_config['increasefilter_gap'], 
-                        use_do=True)
+        encoder = model_ResNet([2,2,2,2], 
+                         inchannel=configs.in_channel, 
+                         num_classes=configs.num_classes)
+        
+        # encoder = ResNetEncoder(
+        #                 in_channels=encoder_config['in_channels'], 
+        #                 base_filters=encoder_config['base_filters'],
+        #                 kernel_size=encoder_config['kernel_size'], 
+        #                 stride=encoder_config['stride'], 
+        #                 groups=1, 
+        #                 n_block=encoder_config['n_block'], 
+        #                 downsample_gap=encoder_config['downsample_gap'], 
+        #                 increasefilter_gap=encoder_config['increasefilter_gap'], 
+        #                 use_do=True)
         return encoder
     
     def forward(self, x):
