@@ -49,6 +49,7 @@ class TransDataset(Dataset):
         return x
     
     def transformation(self, x):
+        x = x.T
         # args = random.choice(['jitter', 'scaling', 'permutation', 'rotation', 'magnitudewarp', 'timewarp', 'windowslice', 'windowwarp'])
         args = random.choice(['jitter', 'scaling', 'permutation', 'rotation', 'magnitudewarp', 'timewarp', 'original'])
         if args == 'jitter':
@@ -69,11 +70,14 @@ class TransDataset(Dataset):
             x = aug.window_warp(x)
         else:
             pass;
+        x = x.T
         x = self.normalization(x)
         return x
     
     def __getitem__(self, index):
         x =  self.data_x[index]
+        if len(x.shape) == 1:
+            x = x.reshape((configs.in_channel,-1))
         y =  self.data_y[index]
         # self.is_training = False
         if self.is_training:
