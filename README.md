@@ -2,7 +2,7 @@
 
 This directory contains the example codes for the LEAVES that submitted to KDD 2023.
 
-The major contribution componenet is the LEAVES module with the differentiable augmentation methods, which programed in ./models/augo_aug.py and ./utils/differentiable_augs.py, respectively.
+The major contribution componenet is the LEAVES module with the differentiable augmentation methods, which programed in ./models/auto_aug.py and ./utils/differentiable_augs.py, respectively.
 
 The datasets used in this study:
 - Apnea-ECG: https://physionet.org/content/apnea-ecg/1.0.0/
