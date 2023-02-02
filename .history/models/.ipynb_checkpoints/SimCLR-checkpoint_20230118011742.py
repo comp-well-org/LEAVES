@@ -77,7 +77,7 @@ class SimCLR(nn.Module):
     def __init__(self, viewmaker_config, encoder_config):
         super().__init__()
         self.viewmaker_config = viewmaker_config
-        if self.viewmaker_config['use_leaves']:
+        if self.viewmaker_config['use_viewmaker']:
             self.view = self.create_viewmaker(viewmaker_config)
         self.encoder = self.create_encoder(encoder_config)
         
@@ -101,7 +101,7 @@ class SimCLR(nn.Module):
         return encoder
     
     def forward(self, x1, x2):
-        if self.viewmaker_config['use_leaves']:
+        if self.viewmaker_config['use_viewmaker']:
             x1 = self.view(x1)
             x2 = self.view(x2)
         

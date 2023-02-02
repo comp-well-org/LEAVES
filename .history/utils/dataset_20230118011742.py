@@ -81,7 +81,7 @@ class TransDataset(Dataset):
         y =  self.data_y[index]
         # self.is_training = False
         if self.is_training:
-            if not configs.leaves_configs["use_leaves"]:
+            if not configs.viewmaker_configs["use_leaves"]:
                 x1 = self.transformation(x)
                 x2 = self.transformation(x)
                 return x1, x2, y

@@ -13,9 +13,8 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 
 from models.SimCLR import SimCLR
-from models.BYOL import BYOL
 from models.linear_evaluation import LinearEvaResNet
-from train import trainSimCLR, trainLinearEvalution, trainSimCLR_, trainBYOL, trainBYOL_
+from train import trainSimCLR, trainLinearEvalution, trainSimCLR_
 # from torchinfo import summary
 
 from utils.dataset import TransDataset
@@ -42,10 +41,7 @@ def create_dataloader(is_training=True):
 
 def create_model(pretrain, load_pretrained = True, freeze_encoder=False):
     if pretrain:
-        if configs.leaves_configs['framework'] == "simclr":
-            model = SimCLR(configs.leaves_configs, configs.encoder_configs)
-        elif configs.leaves_configs['framework'] == "byol":
-            model = BYOL(configs.leaves_configs, configs.encoder_configs)
+        model = SimCLR(configs.leaves_configs, configs.encoder_configs)
         # state_dict = torch.load(configs.save_model_path)
         # model.load_state_dict(state_dict)
     else:

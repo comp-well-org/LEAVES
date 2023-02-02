@@ -15,7 +15,7 @@ from torch.utils.data import DataLoader
 from models.SimCLR import SimCLR
 from models.BYOL import BYOL
 from models.linear_evaluation import LinearEvaResNet
-from train import trainSimCLR, trainLinearEvalution, trainSimCLR_, trainBYOL, trainBYOL_
+from train import trainSimCLR, trainLinearEvalution, trainSimCLR_
 # from torchinfo import summary
 
 from utils.dataset import TransDataset

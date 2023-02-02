@@ -28,7 +28,6 @@ in_channel = 1
 projection_size = 128
 
 leaves_configs = {
-    'framework': 'simclr',
     'use_leaves' : False,
     'num_channels' : in_channel,
     'view_bound_magnitude' : 0.05,

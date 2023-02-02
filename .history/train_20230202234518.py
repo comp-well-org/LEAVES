@@ -156,9 +156,11 @@ def trainBYOL_(model, trainloader, testloader, device):
         epoch_loss_encoder, epoch_loss_view = 0, 0
         for batch in tqdm(trainloader):
             x1, x2, label = batch
-            encoder_loss = model(x1.to(device, dtype=torch.float), 
+            x1_emb, x2_emb = model(x1.to(device, dtype=torch.float), 
                                    x2.to(device, dtype=torch.float))
-                        
+
+            encoder_loss = contrastiveLoss(x1_emb, x2_emb)
+            
             optimizer_encoder.zero_grad()
             
             encoder_loss.backward()

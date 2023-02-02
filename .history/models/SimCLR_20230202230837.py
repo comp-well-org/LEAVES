@@ -1,9 +1,12 @@
 import math
 import torch
 import torch.nn as nn
-from models.viewmaker import ViewMaker
+# from models.viewmaker import ViewMaker
 from models.resnet import ResNetEncoder
+from models.auto_aug import autoAUG
+from models.resnet_1d import model_ResNet
 import torch.nn.functional as F
+import configs
 
 def l2_normalize(x, dim=1):
     return x / torch.sqrt(torch.sum(x**2, dim=dim).unsqueeze(dim))
@@ -77,27 +80,33 @@ class SimCLR(nn.Module):
     def __init__(self, viewmaker_config, encoder_config):
         super().__init__()
         self.viewmaker_config = viewmaker_config
+        # if self.viewmaker_config['use_leaves']:
+        #     self.view = self.create_viewmaker(viewmaker_config)
         if self.viewmaker_config['use_leaves']:
-            self.view = self.create_viewmaker(viewmaker_config)
+            self.view = autoAUG(num_channel = configs.in_channel)
         self.encoder = self.create_encoder(encoder_config)
+        self.fc = nn.Linear(512, 16)
         
-    def create_viewmaker(self, viewmaker_config):
-        view_model = ViewMaker(num_channels = viewmaker_config['num_channels'],
-                               distortion_budget = viewmaker_config['view_bound_magnitude'],
-                               clamp = viewmaker_config['clamp'])
-        return view_model
+    # def create_viewmaker(self, viewmaker_config):
+    #     view_model = ViewMaker(num_channels = viewmaker_config['num_channels'],
+    #                            distortion_budget = viewmaker_config['view_bound_magnitude'],
+    #                            clamp = viewmaker_config['clamp'])
+    #     return view_model
     
     def create_encoder(self, encoder_config):
-        encoder = ResNetEncoder(
-                        in_channels=encoder_config['in_channels'], 
-                        base_filters=encoder_config['base_filters'],
-                        kernel_size=encoder_config['kernel_size'], 
-                        stride=encoder_config['stride'], 
-                        groups=1, 
-                        n_block=encoder_config['n_block'], 
-                        downsample_gap=encoder_config['downsample_gap'], 
-                        increasefilter_gap=encoder_config['increasefilter_gap'], 
-                        use_do=True)
+        encoder = model_ResNet([2,2,2,2], 
+                    inchannel=configs.in_channel, 
+                    num_classes=configs.num_classes)
+        # encoder = ResNetEncoder(
+        #                 in_channels=encoder_config['in_channels'], 
+        #                 base_filters=encoder_config['base_filters'],
+        #                 kernel_size=encoder_config['kernel_size'], 
+        #                 stride=encoder_config['stride'], 
+        #                 groups=1, 
+        #                 n_block=encoder_config['n_block'], 
+        #                 downsample_gap=encoder_config['downsample_gap'], 
+        #                 increasefilter_gap=encoder_config['increasefilter_gap'], 
+        #                 use_do=True)
         return encoder
     
     def forward(self, x1, x2):
@@ -105,8 +114,8 @@ class SimCLR(nn.Module):
             x1 = self.view(x1)
             x2 = self.view(x2)
         
-        view1_emb = self.encoder(x1)
-        view2_emb = self.encoder(x2)
+        view1_emb = self.fc(self.encoder(x1))
+        view2_emb = self.fc(self.encoder(x2))
         
         return view1_emb, view2_emb
 

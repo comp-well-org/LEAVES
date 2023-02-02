@@ -13,9 +13,8 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 
 from models.SimCLR import SimCLR
-from models.BYOL import BYOL
 from models.linear_evaluation import LinearEvaResNet
-from train import trainSimCLR, trainLinearEvalution, trainSimCLR_, trainBYOL, trainBYOL_
+from train import trainSimCLR, trainLinearEvalution, trainSimCLR_
 # from torchinfo import summary
 
 from utils.dataset import TransDataset
@@ -40,16 +39,13 @@ def create_dataloader(is_training=True):
         num_workers=8)
     return trainLoader, testLoader
 
-def create_model(pretrain, load_pretrained = True, freeze_encoder=False):
+def create_model(pretrain, load_pretrained = True, freeze_encoder=True):
     if pretrain:
-        if configs.leaves_configs['framework'] == "simclr":
-            model = SimCLR(configs.leaves_configs, configs.encoder_configs)
-        elif configs.leaves_configs['framework'] == "byol":
-            model = BYOL(configs.leaves_configs, configs.encoder_configs)
+        model = SimCLR(configs.viewmaker_configs, configs.encoder_configs)
         # state_dict = torch.load(configs.save_model_path)
         # model.load_state_dict(state_dict)
     else:
-        model = LinearEvaResNet(configs.num_classes, configs.encoder_configs, viewmaker_config=configs.leaves_configs, use_viewer=True)
+        model = LinearEvaResNet(configs.num_classes, configs.encoder_configs, viewmaker_config=configs.viewmaker_configs, use_viewer=True)
         # model = nn.DataParallel(model)
         if load_pretrained:
             state_dict = torch.load(configs.save_model_path)
@@ -76,23 +72,21 @@ def create_model(pretrain, load_pretrained = True, freeze_encoder=False):
 
 def main():
     trainLoader, testLoader = create_dataloader(is_training=configs.pretrain)
+    # trainSet = TransDataset(configs.filepath_train, is_training=is_training)
+    # testSet = TransDataset(configs.filepath_test, is_training=True)
+    # model = model_ResNet([2,2,2,2], 
+    #                      inchannel=configs.in_channel, 
+    #                      num_classes=configs.num_classes).to(device)
     model = create_model(pretrain=configs.pretrain, 
                          load_pretrained=True, 
                          freeze_encoder=False).to(device)
     model = nn.DataParallel(model)
+    # summary(model, ((256, 1, 6000), (256, 1, 6000)))
     if configs.pretrain:
-        if configs.leaves_configs['framework'] == "simclr":
-            if configs.leaves_configs['use_leaves']:
-                trainSimCLR(model, trainLoader, testLoader, device)
-            else:
-                trainSimCLR_(model, trainLoader, testLoader, device)
-        elif configs.leaves_configs['framework'] == "byol":
-            if configs.leaves_configs['use_leaves']:
-                trainBYOL(model, trainLoader, testLoader, device)
-            else:
-                trainBYOL_(model, trainLoader, testLoader, device)
+        if configs.viewmaker_configs['use_leaves']:
+            trainSimCLR(model, trainLoader, testLoader, device)
         else:
-            raise Exception("Framework not impelemented yet")
+            trainSimCLR_(model, trainLoader, testLoader, device)
     else:
         trainLinearEvalution(model, trainLoader, testLoader, device)
     
