@@ -157,7 +157,7 @@ class BYOL(nn.Module):
         if return_embedding:
             return self.online_encoder(x, return_projection = return_projection)
 
-        image_one, image_two = self.view(x1), self.view(x2)
+        image_one, image_two = x1, self.view(x2)
 
         online_proj_one, _ = self.online_encoder(image_one)
         online_proj_two, _ = self.online_encoder(image_two)
