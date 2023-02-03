@@ -111,7 +111,7 @@ class SimCLR(nn.Module):
     
     def forward(self, x1, x2):
         if self.leaves_config['use_leaves']:
-            x1 = self.view(x1)
+            x1 = x1
             x2 = self.view(x2)
         
         view1_emb = self.fc(self.encoder(x1))
