@@ -14,4 +14,4 @@ The processing codes for PTB-XL and Sleep-EDFE is in the ./utils directory
 
 The python environment used in this work can be found in environment.yml
 
-Command of 'run main.py' can be used to run the projects. The settings, such as path of the dataset, hyper-parameters, can be found in configs.py file.
+Command of 'python main.py' can be used to run the projects. The settings, such as path of the dataset, hyper-parameters, can be found in configs.py file.
