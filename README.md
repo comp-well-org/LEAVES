@@ -1,6 +1,6 @@
 ## LEAVES
 
-This directory contains the example codes for the LEAVES submitted to KDD 2023.
+This directory contains the example codes for the LEAVES.
 
 The major contribution componenet is the LEAVES module with the differentiable augmentation methods, which programed in ./models/auto_aug.py and ./utils/differentiable_augs.py, respectively.
 
