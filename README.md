@@ -3,6 +3,7 @@
 This directory contains the example codes for the LEAVES.
 
 LEAVES: Learning Views for Time-Series Data in Contrastive Learning
+
 Han Yu, Huiyuan Yang, Akane Sano
 
 https://arxiv.org/abs/2210.07340
