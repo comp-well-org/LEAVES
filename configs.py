@@ -20,25 +20,25 @@ epochs = 100
 save_path = './experiments/ptbxl/leaves/byol_v2/' 
 save_model_path = save_path + 'checkpoint_100.pth' ## path of saved model in contrastive learning, model will load weights for down-stream tasks
 ################################ aug Configs ################################
-noise_sigma = 0.5
-warp_sigma = 0.5
+noise_sigma = 0.5 # sigma value for the nosie-controlled augmentations such as jitter scaling
+warp_sigma = 0.5 # sigma value for magW
 use_attention = False
 ################################ Model Configs ################################
-in_channel = 12
+in_channel = 12 # The input channel number for the input
 projection_size = 128
 projection_hidden_size = 1024
 ################################ Dual Modal Configs ################################
-in_channel1 = 1
-in_channel2 = 1
-projection_size = 128
-projection_hidden_size = 1024
-dual_modal = False
+in_channel1 = 1 # The input channel number for the first modality
+in_channel2 = 1 # The input channel number for the second modality
+projection_size = 128 
+projection_hidden_size = 1024 # The dimension of latent embeddings
+dual_modal = False # whether use dual modality (True if you want to input two modalities together)
 
 supResolution = 10
 
 leaves_configs = {
-    'framework': 'byol',
-    'use_leaves' : True,
+    'framework': 'simclr', # can be ["simclr" or "byol"]
+    'use_leaves' : True, # Use manually tuned augmentation if False
     'num_channels' : in_channel,
     'view_bound_magnitude' : 0.05,
     'clamp' : True 
