@@ -11,7 +11,7 @@ from scipy.special import softmax
 
 def trainSimCLR(model, trainloader, testloader, device):
     
-    view_parameters = list(model.module.view.parameters()) + model.module.view.params
+    view_parameters = list(model.module.view.parameters()) + list(model.module.view2.parameters()) + model.module.view.params + model.module.view2.params
     optimizer_view = torch.optim.Adam(view_parameters, lr=configs.LR)
     optimizer_encoder = torch.optim.Adam(model.module.encoder.parameters(), lr=configs.LR)
     
@@ -19,8 +19,11 @@ def trainSimCLR(model, trainloader, testloader, device):
     tb_writer = SummaryWriter(log_dir = configs.save_path, comment='init_run')
     
     params_dict = {}
+    params_dict2 = {}
     for e in range(configs.epochs):
         params_dict[e] = [x.detach().cpu().numpy() for x in model.module.view.params]
+        params_dict2[e] = [x.detach().cpu().numpy() for x in model.module.view2.params]
+        print(params_dict[e])
         model.train()
         epoch_loss_encoder, epoch_loss_view = 0, 0
         for batch in tqdm(trainloader):
@@ -61,6 +64,7 @@ def trainSimCLR(model, trainloader, testloader, device):
             # print(confusion_matrix(y_test, pred_y))
             torch.save(model.state_dict(), save_path)
         np.save(configs.save_path + 'params_dict.npy', params_dict, allow_pickle=True)
+        np.save(configs.save_path + 'params_dict2.npy', params_dict2, allow_pickle=True)
         
 def trainSimCLR_(model, trainloader, testloader, device):
     optimizer_encoder = torch.optim.Adam(model.module.encoder.parameters(), lr=configs.LR)
@@ -95,7 +99,7 @@ def trainSimCLR_(model, trainloader, testloader, device):
             
 def trainBYOL(model, trainloader, testloader, device):
     
-    view_parameters = list(model.module.view.parameters()) + model.module.view.params
+    view_parameters = list(model.module.view.parameters()) + list(model.module.view2.parameters()) + model.module.view.params + model.module.view2.params
     optimizer_view = torch.optim.Adam(view_parameters, lr=configs.LR)
     optimizer_encoder = torch.optim.Adam(model.module.encoder.parameters(), lr=configs.LR)
     
@@ -103,8 +107,11 @@ def trainBYOL(model, trainloader, testloader, device):
     tb_writer = SummaryWriter(log_dir = configs.save_path, comment='init_run')
     
     params_dict = {}
+    params_dict2 = {}
     for e in range(configs.epochs):
         params_dict[e] = [x.detach().cpu().numpy() for x in model.module.view.params]
+        params_dict2[e] = [x.detach().cpu().numpy() for x in model.module.view2.params]
+        print(params_dict[e])
         model.train()
         epoch_loss_encoder, epoch_loss_view = 0, 0
         for batch in tqdm(trainloader):
@@ -145,6 +152,7 @@ def trainBYOL(model, trainloader, testloader, device):
             # print(confusion_matrix(y_test, pred_y))
             torch.save(model.state_dict(), save_path)
         np.save(configs.save_path + 'params_dict.npy', params_dict, allow_pickle=True)
+        np.save(configs.save_path + 'params_dict2.npy', params_dict2, allow_pickle=True)
         
 def trainBYOL_(model, trainloader, testloader, device):
     optimizer_encoder = torch.optim.Adam(model.module.encoder.parameters(), lr=configs.LR)

@@ -121,3 +121,30 @@ def magnitude_warp(x, sigma, knot=4):
     yy = m.rsample(sample_shape=(x.size(0), x.size(1), knot))
     wave = F.interpolate(yy, size=x.size(2), mode ='linear')
     return wave * x
+
+## freq drepression
+def freq_depress(x, rate, temperature=10.0, scale_factor=1.0, dim=1):
+    xy_f = torch.fft.fft(x, dim=dim)
+    x_device = x.get_device()
+    
+    # Soft mask creation
+    m_value = (torch.FloatTensor(xy_f.shape).uniform_().to(x_device) - rate) * temperature
+    m = torch.sigmoid(m_value)
+    
+    amp = torch.abs(xy_f)
+    
+    # Protection mask for dominant frequencies using tanh
+    normalized_amp = amp / amp.max()
+    tanh_input = scale_factor * normalized_amp
+    protection_mask = 0.5 * (torch.tanh(tanh_input) + 1)  # Scaling and shifting to range [0, 1]
+    
+    # Combining masks
+    combined_mask = (1 - protection_mask) * m
+    
+    # Soft mask application
+    freal = xy_f.real * (1 - combined_mask)
+    fimag = xy_f.imag * (1 - combined_mask)
+    xy_f = torch.complex(freal, fimag)
+    
+    xy = torch.fft.ifft(xy_f, dim=dim)
+    return xy

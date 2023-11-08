@@ -2,7 +2,7 @@ from re import X
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from utils.differentiable_augs import jitter, scaling, rotation, time_distortion, permutation, magnitude_warp
+from utils.differentiable_augs import jitter, scaling, rotation, time_distortion, permutation, magnitude_warp, freq_depress
 import configs
 
 class augAttn(nn.Module):
@@ -53,10 +53,13 @@ class autoAUG(nn.Module):
 
         self.magW_sigma = nn.Parameter(0.1 * torch.ones(1), requires_grad=True)
         self.magW = magnitude_warp
+        
+        self.freq_mask_sigma = nn.Parameter(1 * torch.ones(1), requires_grad=True)
+        self.freq_depress = freq_depress
 
         self.augAttn = augAttn(channels=configs.in_channel)
         self.params = [self.jitter_sigma, self.scaling_sigma, self.rotation_prob, self.mixture_weights,
-                       self.nromal_mean, self.nromal_sigma, self.permuation_seg, self.magW_sigma]
+                       self.nromal_mean, self.nromal_sigma, self.freq_mask_sigma, self.permuation_seg, self.magW_sigma]
 
         self.e = 1e-5
 
@@ -65,7 +68,7 @@ class autoAUG(nn.Module):
         x /= (x.max(2, keepdim=True)[0] + 0.00000001)
         return x
     
-    def forward(self, x):
+    def forward(self, x): 
         if configs.use_attention:
             attn = self.augAttn(x)
         else:
@@ -73,6 +76,7 @@ class autoAUG(nn.Module):
         x = self.jitter(x, 0.05 * torch.sigmoid(self.jitter_sigma) + self.e, attention=attn)
         x = self.scaling(x, 0.05 * torch.sigmoid(self.scaling_sigma) + self.e)
         # x = self.rotation(x, torch.sigmoid(self.rotation_prob).repeat(x.size(0), 1))
+        x = self.freq_depress(x, self.freq_mask_sigma).real
         x = self.timeDis(x, self.mixture_weights, self.nromal_mean, F.relu(self.nromal_sigma) + self.e)
         x = self.permutation(x, self.permuation_seg)
         x = self.magW(x, 0.05 * torch.sigmoid(self.magW_sigma) + self.e)

@@ -4,9 +4,10 @@ import torch.nn as nn
 # from models.viewmaker import ViewMaker
 from models.resnet import ResNetEncoder
 from models.auto_aug import autoAUG
-from models.resnet_1d import model_ResNet
+from models.resnet_1d import model_ResNet, model_ResNet_dualmodal
 import torch.nn.functional as F
 import configs
+import copy
 
 def l2_normalize(x, dim=1):
     return x / torch.sqrt(torch.sum(x**2, dim=dim).unsqueeze(dim))
@@ -77,15 +78,20 @@ class ContrastiveLoss(nn.Module):
         return 1.0 / (2*N) * loss
 
 class SimCLR(nn.Module):
-    def __init__(self, leaves_config, encoder_config):
+    def __init__(self, leaves_config, dual_modal=configs.dual_modal):
         super().__init__()
         self.leaves_config = leaves_config
+        self.dual_modal = dual_modal
         # if self.leaves_config['use_leaves']:
         #     self.view = self.create_viewmaker(leaves_config)
         if self.leaves_config['use_leaves']:
             self.view = autoAUG(num_channel = configs.in_channel)
-        self.encoder = self.create_encoder(encoder_config)
-        self.fc = nn.Linear(512, 16)
+            self.view2 = autoAUG(num_channel = configs.in_channel)
+        self.encoder = self.create_encoder()
+        if configs.dual_modal:
+            self.fc = nn.Linear(1024, 16)
+        else:
+            self.fc = nn.Linear(512, 16)
         
     # def create_viewmaker(self, leaves_config):
     #     view_model = ViewMaker(num_channels = leaves_config['num_channels'],
@@ -93,10 +99,15 @@ class SimCLR(nn.Module):
     #                            clamp = leaves_config['clamp'])
     #     return view_model
     
-    def create_encoder(self, encoder_config):
+    def create_encoder(self):
         encoder = model_ResNet([2,2,2,2], 
                     inchannel=configs.in_channel, 
                     num_classes=configs.num_classes)
+        if self.dual_modal:
+            encoder = model_ResNet_dualmodal([2,2,2,2], 
+                        inchannel1=configs.in_channel1, 
+                        inchannel2=configs.in_channel2, 
+                        num_classes=configs.num_classes)
         # encoder = ResNetEncoder(
         #                 in_channels=encoder_config['in_channels'], 
         #                 base_filters=encoder_config['base_filters'],
@@ -110,12 +121,22 @@ class SimCLR(nn.Module):
         return encoder
     
     def forward(self, x1, x2):
-        if self.leaves_config['use_leaves']:
-            x1 = self.view(x1)
-            x2 = self.view(x2)
-        
-        view1_emb = self.fc(self.encoder(x1))
-        view2_emb = self.fc(self.encoder(x2))
+        if self.dual_modal:
+            if self.leaves_config['use_leaves']:
+                x1_1 = self.view(x1)
+                x1_2 = self.view(copy.deepcopy(x1))
+                x2_1 = self.view2(x2)
+                x2_2 = self.view2(copy.deepcopy(x2))
+            
+            view1_emb = self.fc(self.encoder(x1_1, x2_1))
+            view2_emb = self.fc(self.encoder(x1_2, x2_2))
+        else:
+            if self.leaves_config['use_leaves']:
+                x1 = self.view(x1)
+                x2 = self.view(x2)
+            
+            view1_emb = self.fc(self.encoder(x1))
+            view2_emb = self.fc(self.encoder(x2))
         
         return view1_emb, view2_emb
 

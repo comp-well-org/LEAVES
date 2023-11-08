@@ -9,7 +9,7 @@ from torch import nn
 import torch.nn.functional as F
 
 from models.auto_aug import autoAUG
-from models.resnet_1d import model_ResNet
+from models.resnet_1d import model_ResNet, model_ResNet_dualmodal
 import configs
 
 # helper functions
@@ -107,17 +107,20 @@ class BYOL(nn.Module):
         leaves_config,
         encoder_config,
         moving_average_decay = 0.99,
-        use_momentum = True
+        use_momentum = True,
+        dual_modal=configs.dual_modal
     ):
         super().__init__()
-        
+        self.dual_modal = dual_modal
         self.leaves_config = leaves_config
         if self.leaves_config['use_leaves']:
             self.view = autoAUG(num_channel = configs.in_channel)
-        self.online_encoder = nn.Sequential([
-            self.create_encoder(encoder_config),
-            MLP(512, configs.projection_size)
-        ])
+            self.view2 = autoAUG(num_channel = configs.in_channel)
+        self.encoder = self.create_encoder()
+        if not dual_modal:
+            self.fc = nn.Linear(512, 16)
+        else:
+            self.fc = nn.Linear(1024, 16)
 
         self.use_momentum = use_momentum
         self.target_encoder = None
@@ -125,15 +128,21 @@ class BYOL(nn.Module):
 
         self.online_predictor = MLP(configs.projection_size, configs.projection_size, configs.projection_hidden_size)
 
-    def create_encoder(self, encoder_config):
+    def create_encoder(self):
         encoder = model_ResNet([2,2,2,2], 
                     inchannel=configs.in_channel, 
                     num_classes=configs.num_classes)
+        if self.dual_modal:
+            encoder = model_ResNet_dualmodal([2,2,2,2], 
+                        inchannel1=configs.in_channel1, 
+                        inchannel2=configs.in_channel2, 
+                        num_classes=configs.num_classes)
+            
         return encoder
     
     @singleton('target_encoder')
     def _get_target_encoder(self):
-        target_encoder = copy.deepcopy(self.online_encoder)
+        target_encoder = copy.deepcopy(self.encoder)
         set_requires_grad(target_encoder, False)
         return target_encoder
 
@@ -150,30 +159,38 @@ class BYOL(nn.Module):
         self,
         x1,
         x2,
-        return_embedding = False,
-        return_projection = True
     ):
 
-        if return_embedding:
-            return self.online_encoder(x, return_projection = return_projection)
-
-        image_one, image_two = self.view(x1), self.view(x2)
-
-        online_proj_one, _ = self.online_encoder(image_one)
-        online_proj_two, _ = self.online_encoder(image_two)
-
-        online_pred_one = self.online_predictor(online_proj_one)
-        online_pred_two = self.online_predictor(online_proj_two)
+        if self.dual_modal:
+            if self.leaves_config['use_leaves']:
+                x1_1 = self.view(x1)
+                x1_2 = self.view(copy.deepcopy(x1))
+                x2_1 = self.view2(x2)
+                x2_2 = self.view2(copy.deepcopy(x2))
+            
+            online_proj_one = self.fc(self.encoder(x1_1, x2_1))
+            online_proj_two = self.fc(self.encoder(x1_2, x2_2))
+        else:
+            if self.leaves_config['use_leaves']:
+                x1 = self.view(x1)
+                x2 = self.view(x2)
+            
+            online_proj_one = self.fc(self.encoder(x1))
+            online_proj_two = self.fc(self.encoder(x2))
 
         with torch.no_grad():
             target_encoder = self._get_target_encoder() if self.use_momentum else self.online_encoder
-            target_proj_one, _ = target_encoder(image_one)
-            target_proj_two, _ = target_encoder(image_two)
+            if self.dual_modal:
+                target_proj_one = self.fc(target_encoder(x1_1, x2_1))
+                target_proj_two = self.fc(target_encoder(x1_2, x2_2))
+            else:
+                target_proj_one = self.fc(target_encoder(x1))
+                target_proj_two = self.fc(target_encoder(x2))
             target_proj_one.detach_()
             target_proj_two.detach_()
 
-        loss_one = loss_fn(online_pred_one, target_proj_two.detach())
-        loss_two = loss_fn(online_pred_two, target_proj_one.detach())
+        loss_one = loss_fn(online_proj_one, target_proj_two.detach())
+        loss_two = loss_fn(online_proj_two, target_proj_one.detach())
 
         loss = loss_one + loss_two
         return loss.mean()

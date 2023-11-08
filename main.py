@@ -18,10 +18,21 @@ from models.linear_evaluation import LinearEvaResNet
 from train import trainSimCLR, trainLinearEvalution, trainSimCLR_, trainBYOL, trainBYOL_
 # from torchinfo import summary
 
-from utils.dataset import TransDataset
+from utils.dataset import TransDataset, SemiSupDatasetSMILE, SupervisedDataset, SleepEDFE_Dataset
 import configs
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+def create_dataloader_smile(is_training=True):
+    trainSet = SupervisedDataset()
+    trainLoader = DataLoader(
+        trainSet,
+        batch_size=configs.batchsize,
+        shuffle=True,
+        drop_last=True, 
+        num_workers=8)
+
+    return trainLoader, None
 
 def create_dataloader(is_training=True):
     trainSet = TransDataset(configs.filepath_train, is_training=is_training)
@@ -43,7 +54,7 @@ def create_dataloader(is_training=True):
 def create_model(pretrain, load_pretrained = True, freeze_encoder=False):
     if pretrain:
         if configs.leaves_configs['framework'] == "simclr":
-            model = SimCLR(configs.leaves_configs, configs.encoder_configs)
+            model = SimCLR(configs.leaves_configs)
         elif configs.leaves_configs['framework'] == "byol":
             model = BYOL(configs.leaves_configs, configs.encoder_configs)
         # state_dict = torch.load(configs.save_model_path)
@@ -77,7 +88,7 @@ def create_model(pretrain, load_pretrained = True, freeze_encoder=False):
 def main():
     trainLoader, testLoader = create_dataloader(is_training=configs.pretrain)
     model = create_model(pretrain=configs.pretrain, 
-                         load_pretrained=True, 
+                         load_pretrained=False, 
                          freeze_encoder=False).to(device)
     model = nn.DataParallel(model)
     if configs.pretrain:
