@@ -22,7 +22,7 @@ The major contribution component is the LEAVES module with the differentiable au
 - [📖 Table of Contents](#-table-of-contents)
 - [📍 Abstract](#-abstract)
 - [📂 Repository Structure](#-repository-structure)
-- [⚙️ Modules](#️-modules)
+- [⚙️ Codes](#️-modules)
 - [🚀 Getting Started](#-getting-started)
   - [🔧 Installation](#-installation)
   - [🤖 Running LEAVES](#-running-leaves)
@@ -66,7 +66,7 @@ The repository "LEAVES" contains code for efficient tuning learning views for va
 ---
 
 
-## ⚙️ Modules
+## ⚙️ Codes
 
 <details closed><summary>Root</summary>
 
