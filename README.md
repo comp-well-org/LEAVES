@@ -12,12 +12,6 @@ Han Yu, Huiyuan Yang, Akane Sano
 https://arxiv.org/abs/2210.07340
 
 The major contribution component is the LEAVES module with the differentiable augmentation methods, which programmed in ./models/auto_aug.py and ./utils/differentiable_augs.py, respectively.
-
-The datasets used in this study:
-Apnea-ECG: https://physionet.org/content/apnea-ecg/1.0.0/
-Sleep-EDFE: https://www.physionet.org/content/sleep-edfx/1.0.0/
-PAMAP2: https://archive.ics.uci.edu/ml/datasets/pamap2+physical+activity+monitoring
-PTB-XL: https://physionet.org/content/ptb-xl/1.0.2/
 </h3>
 
 </div>
@@ -32,13 +26,6 @@ PTB-XL: https://physionet.org/content/ptb-xl/1.0.2/
 - [🚀 Getting Started](#-getting-started)
   - [🔧 Installation](#-installation)
   - [🤖 Running LEAVES](#-running-leaves)
-  - [🧪 Tests](#-tests)
-- [🛣 Project Roadmap](#-project-roadmap)
-- [🤝 Contributing](#-contributing)
-    - [*Contributing Guidelines*](#contributing-guidelines)
-- [📄 License](#-license)
-- [👏 Acknowledgments](#-acknowledgments)
-
 ---
 
 
@@ -164,73 +151,10 @@ Config your training in the ```configs.py ``` file including the data config and
 python main.py
 ```
 
-### 🧪 Tests
-```sh
-pytest
-```
+4. Datasets:
 
----
-
-
-## 🛣 Project Roadmap
-
-> - [X] `ℹ️  Task 1: Implement X`
-> - [ ] `ℹ️  Task 2: Implement Y`
-> - [ ] `ℹ️ ...`
-
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Here are several ways you can contribute:
-
-- **[Submit Pull Requests](https://github.com/comp-well-org/LEAVES/blob/main/CONTRIBUTING.md)**: Review open PRs, and submit your own PRs.
-- **[Join the Discussions](https://github.com/comp-well-org/LEAVES/discussions)**: Share your insights, provide feedback, or ask questions.
-- **[Report Issues](https://github.com/comp-well-org/LEAVES/issues)**: Submit bugs found or log feature requests for COMP-WELL-ORG.
-
-#### *Contributing Guidelines*
-
-<details closed>
-<summary>Click to expand</summary>
-
-1. **Fork the Repository**: Start by forking the project repository to your GitHub account.
-2. **Clone Locally**: Clone the forked repository to your local machine using a Git client.
-   ```sh
-   git clone <your-forked-repo-url>
-   ```
-3. **Create a New Branch**: Always work on a new branch, giving it a descriptive name.
-   ```sh
-   git checkout -b new-feature-x
-   ```
-4. **Make Your Changes**: Develop and test your changes locally.
-5. **Commit Your Changes**: Commit with a clear and concise message describing your updates.
-   ```sh
-   git commit -m 'Implemented new feature x.'
-   ```
-6. **Push to GitHub**: Push the changes to your forked repository.
-   ```sh
-   git push origin new-feature-x
-   ```
-7. **Submit a Pull Request**: Create a PR against the original project repository. Clearly describe the changes and their motivations.
-
-Once your PR is reviewed and approved, it will be merged into the main branch.
-
-</details>
-
----
-
-## 📄 License
-
-
-This project is protected under the [SELECT-A-LICENSE](https://choosealicense.com/licenses) License. For more details, refer to the [LICENSE](https://choosealicense.com/licenses/) file.
-
----
-
-## 👏 Acknowledgments
-
-- List any resources, contributors, inspiration, etc. here.
-
-[**Return**](#Top)
-
----
+The datasets used in this study:
+- Apnea-ECG: https://physionet.org/content/apnea-ecg/1.0.0/
+- Sleep-EDFE: https://www.physionet.org/content/sleep-edfx/1.0.0/
+- PAMAP2: https://archive.ics.uci.edu/ml/datasets/pamap2+physical+activity+monitoring
+- PTB-XL: https://physionet.org/content/ptb-xl/1.0.2/
