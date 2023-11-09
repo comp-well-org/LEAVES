@@ -118,16 +118,6 @@ The repository "LEAVES" contains code for efficient tuning learning views for va
 
 ## 🚀 Getting Started
 
-***Dependencies***
-
-Please ensure you have the following dependencies installed on your system:
-
-`- ℹ️ Dependency 1`
-
-`- ℹ️ Dependency 2`
-
-`- ℹ️ ...`
-
 ### 🔧 Installation
 
 1. Clone the LEAVES repository:
