@@ -265,8 +265,8 @@ def trainLinearEvalution(model, trainloader, testloader, device):
         print("Accuracy: %.4f " %(accuracy_score(all_true_binary, all_pred_binary)))
         print("f1(macro): %.4f " %(f1_score(all_true_binary, all_pred_binary, average='macro')))
         print("sen: %.4f " %(f1_score(all_true_binary, all_pred_binary, average='macro')))
-        # AUC = roc_auc_score(all_true, softmax(all_pred,axis=1))
-        # print("AUC:", AUC)
+        AUC = roc_auc_score(all_true, softmax(all_pred,axis=1))
+        print("AUC:", AUC)
         print(confusion_matrix(all_true_binary, all_pred_binary))
         
         if f1_score(all_true_binary, all_pred_binary, average='macro') > best_acc:
