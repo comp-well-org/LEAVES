@@ -9,6 +9,8 @@ LEAVES: Learning Views for Time-Series Data in Contrastive Learning
 
 Han Yu, Huiyuan Yang, Akane Sano
 
+Machine Learning for Healthcare 2025
+
 https://arxiv.org/abs/2210.07340
 
 The major contribution component is the LEAVES module with the differentiable augmentation methods, which programmed in ./models/auto_aug.py and ./utils/differentiable_augs.py, respectively.
